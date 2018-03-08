@@ -156,14 +156,17 @@ p1 <- grid.arrange(data_table.rate, p1, ncol=2)
 names(dat.ratio) <- tolower(names(dat.ratio))
 dat.ratio <- subset(dat.ratio,!is.na(dat.ratio$outcome2))
 dat.ratio <- subset(dat.ratio,!is.na(dat.ratio$ratio.ll))
+dat.ratio$author <- paste0(substr(dat.ratio$authors..primary,1,regexpr(",",dat.ratio$authors..primary)-1)," ","et al")
 
 dat.ratio$lgrr <- logb(dat.ratio$ratio.ce)
 dat.ratio$lgll <- logb(dat.ratio$ratio.ll)
 dat.ratio$lgul <- logb(dat.ratio$ratio.ul)
 dat.ratio$se <- (dat.ratio$lgul-dat.ratio$lgll)/(2*1.96)
 
-rr <- rma(yi = dat.ratio$lgrr,sei = dat.ratio$se, method = "ML") 
+rr <- rma(yi = dat.ratio$lgrr,sei = dat.ratio$se, method = "ML", slab=dat.ratio$author) 
 rr.exp <- predict(rr, transf = exp, digits=2)
+
+
 
 # sampling from probability distributions to derive RR and uncertainty estimate with 95% CI
 num_iter <- 10000
@@ -173,7 +176,83 @@ hist((rr.sim))
 
 # plot for ratio
 
-dat.ratio$author <- paste0(substr(dat.ratio$authors..primary,1,regexpr(",",dat.ratio$authors..primary)-1)," ","et al, ",dat.ratio$pub.year)
+#dat.ratio <- dat.ratio[order(dat.ratio$pub.year),]
+#dat.ratio <- dat.ratio[order(dat.ratio$outcome2),]
+
+#rownames(dat.ratio) <- seq(length=nrow(dat.ratio))
+#dat.ratio$author <- format(dat.ratio$author,justify="left")
+
+### decrease margins so the full space is used
+par(mar=c(4,4,1,2), font=1)
+
+forest(rr, xlim=c(-3, 4), at=log(c(0.75,1,2, 4, 8, 12,16,20)), atransf=exp,
+      ilab=dat.ratio$pub.year,
+      ilab.xpos=-1.5,cex=0.75, ylim=c(-1, 35),
+      order=rev(order(dat.ratio$outcome2,dat.ratio$pub.year)),
+      rows=c(3:9,15:19,26:31),
+      xlab="Risk Ratio", mlab="",
+      col = "red", border="red")
+
+### add text with Q-value, dfs, p-value, and I^2 statistic
+text(-3, -1, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                            .(formatC(rr$QE, digits=2, format="f")), ", df = ", .(rr$k - rr$p),
+                                            "; ", I^2, " = ",.(formatC(rr$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(rr)[[1]][[7]], digits=1, format="f")),
+                                           " - ",
+                                           .(formatC(confint(rr)[[1]][[11]], digits=1, format="f")),
+                                           "])")))
+
+### set font expansion factor (as in forest() above) and use bold italic
+### font and save original settings in object 'op'
+op <- par(cex=0.70, font=4)
+
+### add text for the subgroups
+text(-3, c(32,20,10), pos=4, c("Cardiovascular events",
+                               "Myocardial infarction",
+                               "Stroke"))
+
+### switch to bold font
+par(font=2)
+
+### add column headings to the plot
+text(-3,34, "Author(s)",  pos=4)
+text(-1.5,34,"Year")
+text(4,34, "Risk Ratio [95% CI]", pos=2)
+
+### set par back to the original settings
+par(op)
+
+
+### fit random-effects model in the three subgroups
+res.c <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$outcome2=="CVD",],method = "ML") 
+res.m <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$outcome2=="MI",],method = "ML") 
+res.s <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$outcome2=="Stroke",],method = "ML") 
+
+
+### add summary polygons for the three subgroups
+addpoly(res.c, row=23.5, cex=0.75, atransf=exp, mlab="",col = "blue", border="blue")
+addpoly(res.m, row= 12.5, cex=0.75, atransf=exp, mlab="",col = "blue", border="blue")
+addpoly(res.s, row= 1.5, cex=0.75, atransf=exp, mlab="",col = "blue", border="blue")
+
+### add text with Q-value, dfs, p-value, and I^2 statistic for subgroups
+text(-3, 24.5, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                             .(formatC(res.c$QE, digits=2, format="f")), ", df = ", .(res.c$k - res.c$p),
+                                             "; ", I^2, " = ",.(formatC(res.c$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(res.c)[[1]][[7]], digits=1, format="f")),
+                                             " - ",
+                                             .(formatC(confint(res.c)[[1]][[11]], digits=1, format="f")),
+                                             "])")))
+text(-3, 13.5, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                             .(formatC(res.m$QE, digits=2, format="f")), ", df = ", .(res.m$k - res.m$p),
+                                             "; ", I^2, " = ",.(formatC(res.m$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(res.m)[[1]][[7]], digits=1, format="f")),
+                                             " - ",
+                                             .(formatC(confint(res.m)[[1]][[11]], digits=1, format="f")),
+                                             "])")))
+text(-3, 1.5, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                            .(formatC(res.s$QE, digits=2, format="f")), ", df = ", .(res.s$k - res.s$p),
+                                            "; ", I^2, " = ",.(formatC(res.s$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(res.s)[[1]][[7]], digits=1, format="f")),
+                                            " - ",
+                                            .(formatC(confint(res.s)[[1]][[11]], digits=1, format="f")),
+                                            "])")))
+
 
 dat.ratio.plot <- dat.ratio[c("author","pub.year","ratio.ce","ratio.ll","ratio.ul","se")]
 dat.ratio.plot <- dat.ratio.plot[order(dat.ratio.plot$pub.year),]
