@@ -1,5 +1,5 @@
 #### This R code assumes that the working directory is set to same directory as that where the R code is saved ####
-
+#### Version used is R version 3.4.4 (2018-03-15) ####
 #### The analysis approach described here uses sampling methods from various distributions. As such the final results estimates may vary slightly from those published.####
 
 # load packages####
@@ -30,6 +30,7 @@ library(RColorBrewer)
 library(rworldmap)
 library(classInt)
 library(gdata)
+library(metafor)
 
 # load beta pharm function ####
 
@@ -290,5 +291,3 @@ beta.parms.from.quantiles <- function(q, p=c(0.025,0.975),
   
   list(a=parms$theta[1], b=parms$theta[2], last.change=parms$last.change, niter=parms$niter, q=q, p=p, p.check=p.check)
 }
-
-

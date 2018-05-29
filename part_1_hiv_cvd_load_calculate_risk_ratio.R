@@ -1,5 +1,5 @@
 #### This R code assumes that the working directory is set to same directory as that where the R code is saved ####
-
+#### Version used is R version 3.4.4 (2018-03-15) ####
 #### The analysis approach described here uses sampling methods from various distributions. As such the final results estimates may vary slightly from those published.####
 
 ###===============================================####
@@ -52,38 +52,38 @@ forest.stroke <- forest(res.stroke, at=log(c(1,5, 10, 25,50,100,250,500)),atrans
 res.stroke <- predict(res.stroke,transf = exp,digits=2)
 
 # meta estimate for incident mi (rate)
-res.mi.data <- dat.rate[ dat.rate$outcome.2=="Incidence - MI",]
-res.mi <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.mi.data,slab = author.year)
-forest.mi <- forest(res.mi, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.mi.data$pub.year))
-res.mi <- predict(res.mi,transf = exp,digits=2)
+res.si.data <- dat.rate[ dat.rate$outcome.2=="Incidence - MI",]
+res.si <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.si.data,slab = author.year)
+forest.mi <- forest(res.si, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.si.data$pub.year))
+res.si <- predict(res.si,transf = exp,digits=2)
 
 # meta estimate for mortality from cvd  (rate)
-res.mort.cvd.data <- dat.rate[ dat.rate$outcome.2=="Mortality - CVD",]
-res.mort.cvd <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.mort.cvd.data,slab = res.mort.cvd.data$author.year)
-forest.res.mort.cvd <- forest(res.mort.cvd, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.mort.cvd.data$pub.year))
-res.mort.cvd <-predict(res.mort.cvd,transf = exp,digits=2)
+res.sort.cvd.data <- dat.rate[ dat.rate$outcome.2=="Mortality - CVD",]
+res.sort.cvd <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.sort.cvd.data,slab = res.sort.cvd.data$author.year)
+forest.res.sort.cvd <- forest(res.sort.cvd, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.sort.cvd.data$pub.year))
+res.sort.cvd <-predict(res.sort.cvd,transf = exp,digits=2)
 
 # meta estimate for mortality from stroke  (rate)
-res.mort.stroke.data <- dat.rate[ dat.rate$outcome.2=="Mortality - Stroke",]
-res.mort.stroke <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.mort.stroke.data,slab=res.mort.stroke.data$author.year)
-forest.res.mort.stroke <- forest(res.mort.stroke, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.mort.stroke.data$pub.year))
-res.mort.stroke <-predict(res.mort.stroke,transf = exp,digits=2)
+res.sort.stroke.data <- dat.rate[ dat.rate$outcome.2=="Mortality - Stroke",]
+res.sort.stroke <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.sort.stroke.data,slab=res.sort.stroke.data$author.year)
+forest.res.sort.stroke <- forest(res.sort.stroke, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.sort.stroke.data$pub.year))
+res.sort.stroke <-predict(res.sort.stroke,transf = exp,digits=2)
 
 # meta estimate for mortality from mi  (rate)
-res.mort.mi.data <- dat.rate[ dat.rate$outcome.2=="Mortality - MI",]
-res.mort.mi <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.mort.mi.data,slab=res.mort.mi.data$author.year)
-forest.res.mort.mi <- forest(res.mort.mi, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.mort.mi.data$pub.year))
-res.mort.mi <-predict(res.mort.mi,transf = exp,digits=2)
+res.sort.mi.data <- dat.rate[ dat.rate$outcome.2=="Mortality - MI",]
+res.sort.mi <- rma.glmm(measure = "IRLN", xi = events, ti = patient.years, data = res.sort.mi.data,slab=res.sort.mi.data$author.year)
+forest.res.sort.mi <- forest(res.sort.mi, at=log(c(1,5, 10, 25,50,100,250,500)),atransf =exp,order=order(res.sort.mi.data$pub.year))
+res.sort.mi <-predict(res.sort.mi,transf = exp,digits=2)
 
 # summary rates
-list <- c(res.cvd,res.mi,res.stroke,res.mort.cvd,res.mort.mi,res.mort.stroke)
+list <- c(res.cvd,res.si,res.stroke,res.sort.cvd,res.sort.mi,res.sort.stroke)
 
 summary.rates <- as.matrix(do.call("rbind",list))
 summary.rates <- matrix(summary.rates,ncol=6)
 summary.rates <- as.data.frame(t(summary.rates))
 names(summary.rates) <- c("pred","V2","ll","ul")
 summary.rates <-summary.rates[,c("pred","ll","ul")] 
-summary.rates$variable <- c("res.cvd","res.mi","res.stroke","res.mort.cvd","res.mort.mi","res.mort.stroke")
+summary.rates$variable <- c("res.cvd","res.si","res.stroke","res.sort.cvd","res.sort.mi","res.sort.stroke")
 summary.rates[c("pred","ll","ul")] <- lapply(summary.rates[c("pred","ll","ul")], function(x){as.numeric(as.character((x)))})
 
 summary.rates$factor <- letters[6:1]
@@ -156,14 +156,25 @@ p1 <- grid.arrange(data_table.rate, p1, ncol=2)
 names(dat.ratio) <- tolower(names(dat.ratio))
 dat.ratio <- subset(dat.ratio,!is.na(dat.ratio$outcome2))
 dat.ratio <- subset(dat.ratio,!is.na(dat.ratio$ratio.ll))
+dat.ratio$author <- paste0(substr(dat.ratio$authors..primary,1,regexpr(",",dat.ratio$authors..primary)-1)," ","et al")
 
+
+# remove tripathi et al as paper provided two estimates with use of the same control group. have chosen the ART+ group to reflect current HIV population
+
+dat.ratio <- dat.ratio[!dat.ratio$order.number==19,]
+  
 dat.ratio$lgrr <- logb(dat.ratio$ratio.ce)
 dat.ratio$lgll <- logb(dat.ratio$ratio.ll)
 dat.ratio$lgul <- logb(dat.ratio$ratio.ul)
 dat.ratio$se <- (dat.ratio$lgul-dat.ratio$lgll)/(2*1.96)
 
-rr <- rma(yi = dat.ratio$lgrr,sei = dat.ratio$se, method = "ML") 
+rr <- rma(yi = dat.ratio$lgrr,sei = dat.ratio$se, method = "ML", slab=dat.ratio$author) 
 rr.exp <- predict(rr, transf = exp, digits=2)
+
+dat.ratio$weights <- weights(rr)
+
+dat.ratio$rr <- paste(format(dat.ratio$ratio.ce,digits=3),"","[",format(dat.ratio$ratio.ll,digits=3),",","",format(dat.ratio$ratio.ul,digits=3),"]" )
+
 
 # sampling from probability distributions to derive RR and uncertainty estimate with 95% CI
 num_iter <- 10000
@@ -173,60 +184,100 @@ hist((rr.sim))
 
 # plot for ratio
 
-dat.ratio$author <- paste0(substr(dat.ratio$authors..primary,1,regexpr(",",dat.ratio$authors..primary)-1)," ","et al, ",dat.ratio$pub.year)
+#dat.ratio <- dat.ratio[order(dat.ratio$pub.year),]
+#dat.ratio <- dat.ratio[order(dat.ratio$outcome2),]
 
-dat.ratio.plot <- dat.ratio[c("author","pub.year","ratio.ce","ratio.ll","ratio.ul","se")]
-dat.ratio.plot <- dat.ratio.plot[order(dat.ratio.plot$pub.year),]
-dat.ratio.plot[,c("ratio.ce","ratio.ll","ratio.ul")] <- lapply(dat.ratio.plot[,c("ratio.ce","ratio.ll","ratio.ul")], as.numeric)
-dat.ratio.plot[,c("ratio.ce","ratio.ll","ratio.ul")] <- lapply(dat.ratio.plot[,c("ratio.ce","ratio.ll","ratio.ul")], function(x){format(round(as.numeric(x),digits=2),nsmall=2)})
-dat.ratio.plot$risk <-paste0(dat.ratio.plot$ratio.ce," ","(",dat.ratio.plot$ratio.ll,"-",dat.ratio.plot$ratio.ul,")") 
+#rownames(dat.ratio) <- seq(length=nrow(dat.ratio))
+#dat.ratio$author <- format(dat.ratio$author,justify="left")
 
-dat.ratio.plot <- rbind(dat.ratio.plot,
-                        c(rep(NA,7)),
-                        c("Pooled estimate",NA,round(rr.exp[[1]],2),round(rr.exp[[3]],2),round(rr.exp[[4]],2),0.05,NA))
+### decrease margins so the full space is used
+par(mar=c(4,4,1,2), font=1)
 
-dat.ratio.plot$risk <-paste0(dat.ratio.plot$ratio.ce," ","(",dat.ratio.plot$ratio.ll,"-",dat.ratio.plot$ratio.ul,")") 
+forest(rr, xlim=c(-3, 4), at=log(c(0.75,1,2, 4, 8, 12,16,20)), atransf=exp,
+      ilab=cbind(dat.ratio$pub.year,format(dat.ratio$weights,digits=2),dat.ratio$rr),
+      ilab.xpos=c(-2,-1.5,-1.0),cex=0.75, ylim=c(-1, 34),
+      order=rev(order(dat.ratio$outcome2,dat.ratio$pub.year)),
+      rows=c(3:9,15:19,26:30),
+      xlab="Risk Ratio", mlab="",
+      col = "red", border="red")
 
-dat.ratio.plot$factor <- c(rep("a",19),"b")
+### add text with Q-value, dfs, p-value, and I^2 statistic
+text(-3, -1, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                            .(formatC(rr$QE, digits=2, format="f")), ", df = ", .(rr$k - rr$p),
+                                            "; ", I^2, " = ",.(formatC(rr$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(rr)[[1]][[7]], digits=1, format="f")),
+                                           " - ",
+                                           .(formatC(confint(rr)[[1]][[11]], digits=1, format="f")),
+                                           "])")))
 
-dat.ratio.plot$factor2 <- letters[1:20]
+### set font expansion factor (as in forest() above) and use bold italic
+### font and save original settings in object 'op'
+op <- par(cex=0.70, font=4)
 
-dat.ratio.plot[,c("ratio.ce","ratio.ll","ratio.ul")] <- lapply(dat.ratio.plot[,c("ratio.ce","ratio.ll","ratio.ul")], function(x){round(as.numeric(x),digits=1)})
+### add text for the subgroups
+text(-3, c(31,20,10), pos=4, c("Cardiovascular events",
+                               "Myocardial infarction",
+                               "Stroke"))
+
+### switch to bold font
+par(font=2)
+
+### add column headings to the plot
+text(-3,34, "Author(s)",  pos=4)
+text(-2,34,"Year")
+text(-1.5,34,"Weights")
+text(-1,34, "Risk Ratio [95% CI]")
+
+### set par back to the original settings
+par(op)
 
 
-## forest plot for ratio
-p2 <- ggplot(dat.ratio.plot,aes(ratio.ce,rev(factor2),)) + 
-  geom_errorbarh(aes(xmax = ratio.ul, xmin = ratio.ll), height = 0.15) +
-  geom_point(aes(size=1/as.numeric(se)^2), shape=21,colour="black",fill="red") +
-  scale_x_continuous(trans="log2",breaks = c(0.5,1,2,seq(4,36,4)), labels = c(0.5,1,2,seq(4,36,4))) +
-  labs(x="Risk ratio (95% Confidence intervals)", y="")+
-  geom_hline(yintercept=0.5,linetype="solid")+
-  geom_vline(xintercept = 1,linetype="dashed")+
-  theme(legend.position="none")
-
-p2
-
-a <- rep(c(letters[20:1]),2)
-b <- rep(c(1:2),each=20)
-c <- c(dat.ratio.plot$author[1:18],"",dat.ratio.plot$author[20],dat.ratio.plot$risk[1:18],"",dat.ratio.plot$risk[20])
-d <- as.data.frame(cbind(a,b,c))
+### fit random-effects model in the three subgroups
+res.c <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$outcome2=="CVD",],method = "ML") 
+res.m <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$outcome2=="MI",],method = "ML") 
+res.s <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$outcome2=="Stroke",],method = "ML") 
 
 
-data_table.ratio <- ggplot(d, aes(x = d$b, y = d$a, label = format(d$c, nsmall = 1))) +
-  geom_text(size = 3, hjust=0, vjust=0) + theme_bw()+
-  theme(panel.grid.major = element_blank(), 
-        legend.position = "none",
-        panel.border = element_blank(), 
-        axis.text.x = element_text(colour="white"),#element_blank(),
-        axis.text.y = element_blank(), 
-        axis.ticks = element_line(colour="white"),#element_blank(),
-        plot.margin = unit(c(0,0,0,0), "lines")) +
-  labs(x="",y="") +
-  coord_cartesian(xlim=c(1,2))
+### add summary polygons for the three subgroups
+addpoly(res.c, row=23.5, cex=0.75, atransf=exp, mlab="",col = "blue", border="blue")
+addpoly(res.m, row= 12.5, cex=0.75, atransf=exp, mlab="",col = "blue", border="blue")
+addpoly(res.s, row= 1.5, cex=0.75, atransf=exp, mlab="",col = "blue", border="blue")
 
-data_table.ratio
+### add text with Q-value, dfs, p-value, and I^2 statistic for subgroups
+text(-3, 24.5, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                             .(formatC(res.c$QE, digits=2, format="f")), ", df = ", .(res.c$k - res.c$p),
+                                             "; ", I^2, " = ",.(formatC(res.c$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(res.c)[[1]][[7]], digits=1, format="f")),
+                                             " - ",
+                                             .(formatC(confint(res.c)[[1]][[11]], digits=1, format="f")),
+                                             "])")))
+res.c <- predict(res.c,transf = exp)
+res.c <- paste(format(round(res.c[[1]],2),nsmall=2),"[",format(round(res.c[[3]],2),nsmall=2),",",format(round(res.c[[4]],2),nsmall=2),"]")
 
-p2 <- grid.arrange(data_table.ratio, p2, ncol=2)
+text(-1, 24.5, cex=0.70, res.c)
+     
+text(-3, 13.5, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                             .(formatC(res.m$QE, digits=2, format="f")), ", df = ", .(res.m$k - res.m$p),
+                                             "; ", I^2, " = ",.(formatC(res.m$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(res.m)[[1]][[7]], digits=1, format="f")),
+                                             " - ",
+                                             .(formatC(confint(res.m)[[1]][[11]], digits=1, format="f")),
+                                             "])")))
+
+res.m <- predict(res.m,transf = exp)
+res.m <- paste(format(round(res.m[[1]],2),nsmall=2),"[",format(round(res.m[[3]],2),nsmall=2),",",format(round(res.m[[4]],2),nsmall=2),"]")
+
+text(-1, 13.5, cex=0.70, res.m)
+
+text(-3, 1.5, pos=4, cex=0.70, bquote(paste("RE Model for All Studies (Q = ",
+                                            .(formatC(res.s$QE, digits=2, format="f")), ", df = ", .(res.s$k - res.s$p),
+                                            "; ", I^2, " = ",.(formatC(res.s$I2, digits=1, format="f")), "%"," [95% CI ",.(formatC(confint(res.s)[[1]][[7]], digits=1, format="f")),
+                                            " - ",
+                                            .(formatC(confint(res.s)[[1]][[11]], digits=1, format="f")),
+                                            "])")))
+
+res.s <- predict(res.s,transf = exp)
+res.s <- paste(format(round(res.s[[1]],2),nsmall=2),"[",format(round(res.s[[3]],2),nsmall=2),",",format(round(res.s[[4]],2),nsmall=2),"]")
+
+text(-1, 1.5, cex=0.70, res.s)
+
 
 # subgroup analysis of ratio
 
@@ -257,6 +308,12 @@ predict(rr.recent,transf = exp,digits=2)
 rr.old <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$pub.year<median(dat.ratio$pub.year),],method = "ML")
 predict(rr.old,transf = exp,digits=2)
 
+# by follow-uo
+rr.long <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$follow.up>=median(dat.ratio$follow.up,na.rm=T),],method = "ML")
+predict(rr.long,transf = exp,digits=2)
+
+rr.short <- rma(yi = lgrr,sei = se, data = dat.ratio[dat.ratio$follow.up<median(dat.ratio$follow.up,na.rm=T),],method = "ML")
+predict(rr.short,transf = exp,digits=2)
 
 ### metaregression by age
 
@@ -287,7 +344,7 @@ lines(30:70, preds$ci.ub, lty="dashed")
 abline(h=1, lty="dashed")
 
 ### metaregression by time
-dat.ratio <- subset(dat.ratio,dat.ratio$pub.year>2005)
+
 rr.time <- rma(yi = lgrr,sei = se, 
               data = dat.ratio, 
               mods = dat.ratio[, "pub.year"], 
@@ -318,6 +375,7 @@ abline(h=1, lty="dashed")
 # publication bias
 regtest(rr)
 predict(trimfill(rr))
-funnel(rr)
-funnel(trimfill(rr))
 
+funnel(rr, atransf = exp,xlab = "Risk Ratio",at=log(c(0.25,0.5, 1,2,2,4,8,16)),ylim = c(0,0.6))
+  
+funnel(trimfill(rr), atransf = exp,xlab = "Risk Ratio",at=log(c(0.25,0.5, 1,2,2,4,8,16)),ylim = c(0,0.6))
