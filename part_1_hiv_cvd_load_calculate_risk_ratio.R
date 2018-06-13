@@ -379,3 +379,4 @@ predict(trimfill(rr))
 funnel(rr, atransf = exp,xlab = "Risk Ratio",at=log(c(0.25,0.5, 1,2,2,4,8,16)),ylim = c(0,0.6))
   
 funnel(trimfill(rr), atransf = exp,xlab = "Risk Ratio",at=log(c(0.25,0.5, 1,2,2,4,8,16)),ylim = c(0,0.6))
+

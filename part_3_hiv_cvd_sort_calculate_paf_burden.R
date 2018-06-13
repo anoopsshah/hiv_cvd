@@ -1,7 +1,7 @@
 #### This R code assumes that the working directory is set to same directory as that where the R code is saved ####
 #### Version used is R version 3.4.4 (2018-03-15) ####
 #### The analysis approach described here uses sampling methods from various distributions. As such the final results estimates may vary slightly from those published.####
-
+#### This part will require part 1 and 2 to be run prior 
 
 ###=======================================================
 ### Part 3 = calculate paf and corresponding CVD burden due to HIV 
@@ -181,21 +181,11 @@ hiv.prev.country <- hiv.prev.country[grepl(priority.countries1,hiv.prev.country$
 
 hiv.prev.country$area.id <- noquote(hiv.prev.country$area.id)
 
-hiv.prev.country$subgroup2 <- factor(hiv.prev.country$subgroup,
-                                     levels=c("Adults (15-49) estimate modelled", "Adults (15-49) lower estimate modelled", 
-                                              "Adults (15-49) upper estimate modelled", "Females Adults (15-49) estimate", 
-                                              "Females Adults (15-49) lower estimate", "Females Adults (15-49) upper estimate", 
-                                              "Males Adults (15-49) estimate", "Males Adults (15-49) lower estimate", 
-                                              "Males Adults (15-49) upper estimate"),
-                                     labels = c("ce","ll","ul","ce","ll","ul","ce","ll","ul"))
+hiv.prev.country$subgroup2 <- factor(hiv.prev.country$subgroup)
+levels(hiv.prev.country$subgroup2) <- c("ce","ll","ul","ce","ll","ul","ce","ll","ul")
 
-hiv.prev.country$subgroup <- factor(hiv.prev.country$subgroup,
-                                    levels=c("Adults (15-49) estimate modelled", "Adults (15-49) lower estimate modelled", 
-                                             "Adults (15-49) upper estimate modelled", "Females Adults (15-49) estimate", 
-                                             "Females Adults (15-49) lower estimate", "Females Adults (15-49) upper estimate", 
-                                             "Males Adults (15-49) estimate", "Males Adults (15-49) lower estimate", 
-                                             "Males Adults (15-49) upper estimate"),
-                                    labels = c("adults","adults","adults","female","female","female","male","male","male"))
+hiv.prev.country$subgroup <- factor(hiv.prev.country$subgroup)
+levels(hiv.prev.country$subgroup) <- c("adults","adults","adults","female","female","female","male","male","male")
 
 hiv.prev.country <- hiv.prev.country[c("subgroup", "area", "area.id", "time.period", "data.value", "subgroup2")]
 

@@ -1,6 +1,7 @@
 #### This R code assumes that the working directory is set to same directory as that where the R code is saved ####
 #### Version used is R version 3.4.4 (2018-03-15) ####
 #### The analysis approach described here uses sampling methods from various distributions. As such the final results estimates may vary slightly from those published.####
+#### This part will require part 1 and 2a and 2b to be run prior 
 
 ###=========================================================
 ### Part 2: estimating burden using daly and prevalence data
